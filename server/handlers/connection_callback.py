@@ -2,6 +2,7 @@ import jwt
 import pika
 import uuid
 
+
 def connection_callback(ch, method, props, body):
     token = jwt.encode(
         {

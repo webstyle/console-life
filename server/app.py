@@ -1,6 +1,5 @@
-import pika, jwt
-
-import connection_callback as conn
+import pika
+from .handlers.connection_callback import connection_callback
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
@@ -14,7 +13,7 @@ channel.queue_declare(queue='get_user_data')
 channel.basic_qos(prefetch_count=1)
 # consume from client
 channel.basic_consume(
-    conn.connection_callback,
+    connection_callback,
     queue='connection',
 )
 
