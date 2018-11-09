@@ -1,7 +1,7 @@
 import pika
 import uuid
 
-class Client(object):
+class ClientConnection(object):
     def __init__(self):
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
@@ -23,20 +23,33 @@ class Client(object):
     def call(self, n):
         self.response = None
         self.corr_id = str(uuid.uuid4())
-        self.channel.basic_publish(exchange='',
-                                   routing_key='connection',
-                                   properties=pika.BasicProperties(
-                                       reply_to=self.callback_queue,
-                                       correlation_id=self.corr_id,
-                                   ),
-                                   body=n)
+        self.channel.basic_publish(
+            exchange='',
+            routing_key='connection',
+            properties=pika.BasicProperties(
+                reply_to=self.callback_queue,
+                correlation_id=self.corr_id,
+            ),
+            body=n)
         while self.response is None:
             self.connection.process_data_events()
         return self.response
 
+def authorization():
+    client_rpc = ClientConnection()
+    name = input("enter your name:")
 
-client_rpc = Client()
-name = input("enter your name:")
-res = client_rpc.call(name)
+    if name is None:
+        print("name is empty")
 
-print(res)
+    token = client_rpc.call(name)
+    f = open("./token.txt", "a")
+    f.write(token.decode("utf-8"))
+
+print("Console life.")
+token = open("./token.txt", "r")
+
+if token is None:
+    authorization()
+else:
+    print("Hi user, we need to check your token")
